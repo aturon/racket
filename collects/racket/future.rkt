@@ -13,4 +13,5 @@
           fsemaphore-wait 
           fsemaphore-try-wait?
           would-be-future
-          futures-enabled?)
+          futures-enabled?
+	  cas-box!)

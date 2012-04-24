@@ -2823,6 +2823,21 @@ int scheme_generate_inlined_nary(mz_jit_state *jitter, Scheme_App_Rec *app, int 
     (void)mz_finish(scheme_current_future);
     jit_retval(JIT_R0);
     return 1;
+  } else if (IS_NAMED_PRIM(rator, "cas-box!")) { 
+    scheme_generate_app(app, NULL, 3, jitter, 0, 0, 2);
+    CHECK_LIMIT();
+    mz_rs_sync();
+
+    JIT_UPDATE_THREAD_RSPTR_IF_NEEDED();
+    jit_movi_l(JIT_R0, 3);
+    mz_prepare(2);
+    jit_pusharg_l(JIT_RUNSTACK);
+    jit_pusharg_l(JIT_R0);
+    (void)mz_finish(scheme_cas_box);
+    jit_retval(JIT_R0);
+    mz_rs_inc(3);
+    mz_runstack_popped(jitter, 3);
+    return 1;
   } else if (!for_branch) {
     if (IS_NAMED_PRIM(rator, "vector-set!")
         || IS_NAMED_PRIM(rator, "unsafe-vector-set!")
