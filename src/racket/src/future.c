@@ -237,7 +237,7 @@ static Scheme_Object *would_be_future(int argc, Scheme_Object *argv[])
   return scheme_future(argc, argv);  
 }
 
-Scheme_Object *scheme_cas_box(int argc, Scheme_Object *argv[])
+Scheme_Object *scheme_box_cas(int argc, Scheme_Object *argv[])
 XFORM_SKIP_PROC
 /* For cooperative threading, no atomicity required */
 {
@@ -274,7 +274,7 @@ void scheme_init_futures(Scheme_Env *newenv)
   FUTURE_PRIM_W_ARITY("fsemaphore-count", scheme_fsemaphore_count, 1, 1, newenv);
   FUTURE_PRIM_W_ARITY("would-be-future", would_be_future, 1, 1, newenv);
   FUTURE_PRIM_W_ARITY("futures-enabled?", futures_enabled, 0, 0, newenv);
-  FUTURE_PRIM_W_ARITY("cas-box!", scheme_cas_box, 3, 3, newenv);
+  FUTURE_PRIM_W_ARITY("box-cas!", scheme_box_cas, 3, 3, newenv);
 
   scheme_finish_primitive_module(newenv);
   scheme_protect_primitive_provide(newenv, NULL);
@@ -556,12 +556,12 @@ void scheme_init_futures(Scheme_Env *newenv)
   GLOBAL_PRIM_W_ARITY("would-be-future", would_be_future, 1, 1, newenv);
   GLOBAL_PRIM_W_ARITY("futures-enabled?", futures_enabled, 0, 0, newenv);
 
-  p = scheme_make_prim_w_arity(scheme_cas_box, 
-			       "cas-box!", 
+  p = scheme_make_prim_w_arity(scheme_box_cas, 
+			       "box-cas!", 
 			       3, 
 			       3);
   SCHEME_PRIM_PROC_FLAGS(p) |= SCHEME_PRIM_IS_NARY_INLINED;
-  scheme_add_global_constant("cas-box!", p, newenv);
+  scheme_add_global_constant("box-cas!", p, newenv);
 
   scheme_finish_primitive_module(newenv);
   scheme_protect_primitive_provide(newenv, NULL);
@@ -2660,7 +2660,7 @@ static void future_do_runtimecall(Scheme_Future_Thread_State *fts,
   }
 }
 
-Scheme_Object *scheme_cas_box(int argc, Scheme_Object *argv[])
+Scheme_Object *scheme_box_cas(int argc, Scheme_Object *argv[])
 XFORM_SKIP_PROC
 {
   Scheme_Object *box = argv[0];
@@ -2669,7 +2669,7 @@ XFORM_SKIP_PROC
 
   /* should add unsafe version that elides this check */
   if (!SCHEME_MUTABLE_BOXP(box)) {
-    scheme_wrong_type("cas!", "mutable box", 0, 1, &box);
+    scheme_wrong_type("box-cas!", "mutable box", 0, 1, &box);
   }
 
   return mzrt_cas((volatile size_t *)(&SCHEME_BOX_VAL(box)), 
