@@ -748,8 +748,55 @@ We should also test deep continuations.
    0
    (touch
     (for/fold ([t (func (lambda () 0))]) ([i (in-range 10000)])
-      (func (lambda () (touch t))))))
-  
+      (func (lambda () (touch t))))))  
+
+  ;; cas-box! tests
+
+  ;; successful cas
+  (let ()
+    (define b (box #f))
+    (check-equal? (cas-box! b #f #t) #t)
+    (check-equal? (unbox b) #t))
+
+  ;; unsuccessful cas
+  (let ()
+    (define b (box #f))
+    (check-equal? (cas-box! b #t #f) #f)
+    (check-equal? (unbox b) #f))
+
+  ;; cas using allocated data
+  (let ()
+    (define b (box '()))
+    (define x (cons 1 (unbox b)))
+    (check-equal? (cas-box! b '() x) #t)
+    (check-equal? (unbox b) x)
+    (check-equal? (cas-box! b x '()) #t)
+    (check-equal? (unbox b) '())
+    (check-equal? (cas-box! b x '()) #f)
+    (check-equal? (unbox b) '()))
+
+  (let ()
+    (define b (box 0))
+    ;; inc and dec, with retry loops
+    (define (inc) 
+      (let loop ()
+	(define cur (unbox b))
+	(unless (cas-box! b cur (+ cur 1))
+	  (loop))))
+    (define (dec) 
+      (let loop ()
+	(define cur (unbox b))
+	(unless (cas-box! b cur (- cur 1))
+	  (loop))))
+    (define (inc-dec-loop)
+      (for ([i (in-range 100000000)])
+	   (inc)
+	   (dec)))
+    (define t1 (func inc-dec-loop))
+    (define t2 (func inc-dec-loop))
+    (touch t1)
+    (touch t2)
+    (check-equal? (unbox b) 0))
   )
 
 (run-tests future)

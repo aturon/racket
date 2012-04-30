@@ -251,6 +251,7 @@ XFORM_SKIP_PROC
 
   if (SCHEME_BOX_VAL(box) == ov) {
     SCHEME_BOX_VAL(box) = nv;
+    return scheme_true;
   } else {
     return scheme_false;
   }
@@ -2666,6 +2667,7 @@ XFORM_SKIP_PROC
   Scheme_Object *ov = argv[1];
   Scheme_Object *nv = argv[2];
 
+  /* should add unsafe version that elides this check */
   if (!SCHEME_MUTABLE_BOXP(box)) {
     scheme_wrong_type("cas!", "mutable box", 0, 1, &box);
   }
