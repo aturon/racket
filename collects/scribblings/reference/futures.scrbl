@@ -124,20 +124,25 @@ execute through a call to @racket[touch], however.
 
 }
 
-@defproc[(cas-box! [loc box?] [old any/c] [new any/c]) boolean?]{
+@defproc[(box-cas! [loc box?] [old any/c] [new any/c]) boolean?]{
   Atomically updates the contents of @racket[loc] to @racket[new], provided
   that @racket[loc] currently contains a value that is @racket[eq?] to
-  @racket[old]. 
+  @racket[old].  When Racket is compiled with support for @tech{futures},
+  this uses a hardware @emph{compare and set} operation.
 
   If no other @tech{threads} or @tech{futures} attempt to access
   @racket[loc], this is equivalent to 
   @racketblock[
   (and (eq? old (unbox loc)) (set-box! loc new) #t)]
   
-  Uses of @racket[cas-box!] be performed safely in parallel with other
+  Uses of @racket[box-cas!] be performed safely in parallel with other
   operations. In contrast, other atomic operations are not safe to perform in
   parallel, and they therefore prevent a computation from continuing in
-  parallel.  }
+  parallel. 
+
+  If @racket[loc] is a @tech{chaperone} or @tech{impersonator} of a box, the
+  @exnraise[exn:fail:contract].
+}
 
 @defproc[(make-fsemaphore [init exact-nonnegative-integer?]) fsemaphore?]{
 
