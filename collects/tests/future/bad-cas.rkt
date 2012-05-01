@@ -6,8 +6,8 @@
   (define b1 (box #t))
   (define (neg-bad)
     (let loop ()
-      (unless (cas-box! b1 #t #f)
-	(unless (cas-box! b1 #f #t)
+      (unless (box-cas! b1 #t #f)
+	(unless (box-cas! b1 #f #t)
 	  (loop)))))
 
   (displayln "b1:")
@@ -21,8 +21,8 @@
 
   (define b2 (box #t))
   (define (neg-good)
-    (unless (cas-box! b2 #t #f)
-      (cas-box! b2 #f #t)))
+    (unless (box-cas! b2 #t #f)
+      (box-cas! b2 #f #t)))
 
   (displayln "b2:")
   (displayln b2)

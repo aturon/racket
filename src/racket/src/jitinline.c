@@ -2836,7 +2836,7 @@ int scheme_generate_inlined_nary(mz_jit_state *jitter, Scheme_App_Rec *app, int 
       mz_prepare(2);
       jit_pusharg_p(JIT_RUNSTACK);
       jit_pusharg_l(JIT_R0);
-      (void)mz_finish(scheme_cas_box);
+      (void)mz_finish(scheme_box_cas);
       jit_retval(JIT_R0);
 
       mz_rs_inc(3);
